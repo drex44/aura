@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura: The Flight Simulator for Human Interaction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles for Charts and Layout */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FAFAF9; /* Warm neutral background */
+            color: #1C1917;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Merriweather', serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .active-tab {
+            border-bottom: 2px solid #0EA5E9; /* Sky 500 */
+            color: #0EA5E9;
+        }
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #E5E7EB;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            background-color: #0EA5E9;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Professional -> Background: #FAFAF9 (Stone 50), Text: #1C1917 (Stone 900), Primary Accent: #0EA5E9 (Sky 500), Secondary Accent: #F43F5E (Rose 500) -->
+    <!-- Application Structure Plan: 
+         1. Hero Section: Value Prop & Mission.
+         2. The Why (Problem): Interactive Chart showing the Skills Gap.
+         3. The Solution (Product): Tabbed interface explaining Technical Differentiators (Voice, MCP, Reverse Role).
+         4. The Engine (Personas): Interactive Persona Selector (Click to reveal behavioral traits).
+         5. The Plan (Roadmap): Vertical Timeline with milestones.
+         6. Market & Impact: Data viz on target segments and retention metrics.
+    -->
+    <!-- Visualization & Content Choices:
+         - Soft Skills Impact: Doughnut Chart (Chart.js) to visualize the 85/15 split. Goal: Inform/Shock.
+         - Target Market: Bar Chart (Chart.js) comparing Training Spend vs Impact. Goal: Compare.
+         - Persona Cards: HTML/CSS Grid with JS selection. Goal: Inform/Engage.
+         - Roadmap: HTML/CSS Vertical Layout. Goal: Organize.
+         - NO SVG/Mermaid: All icons are CSS shapes or Unicode.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="text-stone-800 antialiased">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass-card bg-white/80 border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-2xl font-bold text-stone-900 tracking-tight">Aura</span>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="#problem" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">The Gap</a>
+                    <a href="#solution" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Solution</a>
+                    <a href="#personas" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Personas</a>
+                    <a href="#roadmap" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Execution</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                    <div class="sm:text-center lg:text-left">
+                        <h1 class="text-4xl tracking-tight font-extrabold text-stone-900 sm:text-5xl md:text-6xl">
+                            <span class="block xl:inline">The Flight Simulator for</span>
+                            <span class="block text-sky-500 xl:inline">Human Interaction</span>
+                        </h1>
+                        <p class="mt-3 text-base text-stone-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                            Bridging the <strong>"Exposure Gap"</strong> for the aspirational middle class. Practice high-stakes conversations—from salary negotiations to conflict management—in a safe, low-latency AI environment.
+                        </p>
+                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                            <div class="rounded-md shadow">
+                                <a href="#problem" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 md:py-4 md:text-lg transition duration-150 ease-in-out">
+                                    Explore the Gap
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 bg-stone-50 flex items-center justify-center p-8">
+            <div class="w-full max-w-md bg-white rounded-xl shadow-xl p-6 border border-stone-100">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                    <span class="text-xs text-stone-400 font-mono ml-auto">Simulated Session: Salary Negotiation</span>
+                </div>
+                <div class="space-y-4 font-mono text-sm">
+                    <div class="flex flex-col items-start">
+                        <div class="bg-stone-100 text-stone-800 p-3 rounded-lg rounded-tl-none max-w-[90%]">
+                            <span class="text-xs font-bold text-sky-600 block mb-1">AI (The Budget Hawk):</span>
+                            "Look, we really value you, but the budget for Q3 is completely locked. 15% is impossible."
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <div class="bg-sky-50 text-sky-900 p-3 rounded-lg rounded-tr-none max-w-[90%] border border-sky-100">
+                            <span class="text-xs font-bold text-stone-500 block mb-1">You:</span>
+                            "I understand the constraints. However, my output has increased revenue by 20%..."
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-start animate-pulse">
+                        <div class="bg-stone-100 text-stone-800 p-3 rounded-lg rounded-tl-none max-w-[90%]">
+                            <span class="text-xs font-bold text-red-500 block mb-1">AI (Interrupting):</span>
+                            "Revenue is one thing, margin is another. Can you justify the cost?"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: The Problem (The Gap) -->
+    <section id="problem" class="py-12 bg-white scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-10">
+                <h2 class="text-base text-sky-600 font-semibold tracking-wide uppercase">The Problem</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-stone-900 sm:text-4xl">
+                    The Exposure Gap
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-stone-500 lg:mx-auto">
+                    Education focuses on technical skills, but career growth depends on interaction. For first-gen achievers, this lack of exposure creates a glass ceiling.
+                </p>
+            </div>
+
+            <div class="mt-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="p-6 bg-stone-50 rounded-lg shadow-sm">
+                        <h3 class="text-lg font-medium text-stone-900 mb-4 text-center">Career Success Drivers</h3>
+                        <p class="text-sm text-stone-500 text-center mb-6">Research indicates the vast majority of long-term career success is attributed to soft skills, yet training investment is inverse.</p>
+                        <!-- Chart Container for Skills Gap -->
+                        <div class="chart-container">
+                            <canvas id="skillsGapChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-sky-500 text-white font-bold text-xl">
+                                    !
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <dt class="text-lg leading-6 font-medium text-stone-900">High Friction</dt>
+                                <dd class="mt-2 text-base text-stone-500">
+                                    Human coaching is expensive ($200+/hr) and unscalable. You can't "practice" a salary negotiation at 2 AM with a human coach.
+                                </dd>
+                            </div>
+                        </div>
+
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-stone-300 text-white font-bold text-xl">
+                                    &#9785;
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <dt class="text-lg leading-6 font-medium text-stone-900">Low Realism</dt>
+                                <dd class="mt-2 text-base text-stone-500">
+                                    Static courses and videos are passive. They don't interrupt you, challenge your tone, or make you feel the pressure of the moment.
+                                </dd>
+                            </div>
+                        </div>
+
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-rose-500 text-white font-bold text-xl">
+                                    $
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <dt class="text-lg leading-6 font-medium text-stone-900">The Stake</dt>
+                                <dd class="mt-2 text-base text-stone-500">
+                                    Without practice, people learn on the job. The cost of a "learning mistake" in a real client meeting is lost revenue and stalled careers.
+                                </dd>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: The Solution -->
+    <section id="solution" class="py-12 bg-stone-50 scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-10">
+                <h2 class="text-base text-sky-600 font-semibold tracking-wide uppercase">The Solution</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-stone-900 sm:text-4xl">
+                    Low-Latency Agentic AI
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-stone-500 lg:mx-auto">
+                    Aura isn't a chatbot. It's a behavioral operating system designed for pressure, privacy, and empathy.
+                </p>
+            </div>
+
+            <!-- Tabbed Interface for Technical Differentiators -->
+            <div class="mt-6">
+                <div class="sm:hidden">
+                    <label for="tabs" class="sr-only">Select a feature</label>
+                    <select id="tabs" name="tabs" class="block w-full focus:ring-sky-500 focus:border-sky-500 border-stone-300 rounded-md" onchange="switchTab(this.value)">
+                        <option value="voice">Voice Engine</option>
+                        <option value="privacy">Privacy (MCP)</option>
+                        <option value="reverse">Reverse Role</option>
+                    </select>
+                </div>
+                <div class="hidden sm:block">
+                    <nav class="flex justify-center space-x-4" aria-label="Tabs">
+                        <button onclick="switchTab('voice')" id="tab-btn-voice" class="active-tab px-3 py-2 font-medium text-sm rounded-md transition-colors">
+                            Low-Latency Voice
+                        </button>
+                        <button onclick="switchTab('privacy')" id="tab-btn-privacy" class="px-3 py-2 font-medium text-sm rounded-md text-stone-500 hover:text-stone-700 transition-colors">
+                            Privacy-First (MCP)
+                        </button>
+                        <button onclick="switchTab('reverse')" id="tab-btn-reverse" class="px-3 py-2 font-medium text-sm rounded-md text-stone-500 hover:text-stone-700 transition-colors">
+                            Reverse-Role Mode
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab Content: Voice -->
+                <div id="content-voice" class="mt-8 bg-white rounded-lg shadow-lg p-6 md:p-10 border border-stone-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold text-stone-900 mb-4">Pressure Simulation</h3>
+                            <p class="text-stone-600 mb-4">
+                                Real conversations aren't turn-based text games. People interrupt. They sigh. They hesitate.
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <span class="text-green-500 mr-2">&#10003;</span>
+                                    <span><strong>Sub-500ms Latency:</strong> Feels like a real phone call.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-green-500 mr-2">&#10003;</span>
+                                    <span><strong>Interruption Handling:</strong> The AI stops talking immediately if you cut in.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-green-500 mr-2">&#10003;</span>
+                                    <span><strong>Tonal Shift:</strong> Can switch from "friendly" to "cold" based on your input.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-stone-900 rounded-lg p-4 font-mono text-sm text-green-400 flex flex-col justify-center">
+                            <div class="mb-2 text-stone-500">// Simulation Log</div>
+                            <div>> User: "I need a raise because..."</div>
+                            <div class="text-red-400">> AI (Interrupt Triggered): "Wait. Stop right there."</div>
+                            <div>> AI: "We discussed this last month. The answer hasn't changed."</div>
+                            <div class="mt-4 text-stone-500">Latency: 320ms | Tone: Defensive</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Privacy -->
+                <div id="content-privacy" class="hidden mt-8 bg-white rounded-lg shadow-lg p-6 md:p-10 border border-stone-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold text-stone-900 mb-4">Local-First Architecture</h3>
+                            <p class="text-stone-600 mb-4">
+                                Users won't discuss real salaries or company secrets if the data trains a public model.
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <span class="text-sky-500 mr-2">&#10003;</span>
+                                    <span><strong>Model Context Protocol (MCP):</strong> Connects safely to local documents.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-sky-500 mr-2">&#10003;</span>
+                                    <span><strong>Data Sovereignty:</strong> Session transcripts stay on the device.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-sky-500 mr-2">&#10003;</span>
+                                    <span><strong>Enterprise Safe:</strong> Ready for corporate deployment policies.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="flex items-center justify-center bg-stone-50 rounded-lg border border-stone-200 p-4">
+                            <!-- CSS Block Diagram for Privacy -->
+                            <div class="flex flex-col items-center w-full">
+                                <div class="w-3/4 p-3 bg-white border border-stone-300 rounded shadow-sm text-center font-semibold mb-2">User Device (Local)</div>
+                                <div class="h-6 w-0.5 bg-stone-300 mb-2"></div>
+                                <div class="w-3/4 p-3 bg-sky-50 border border-sky-200 rounded shadow-sm text-center text-sky-700 font-bold mb-2">MCP Secure Layer</div>
+                                <div class="h-6 w-0.5 bg-stone-300 mb-2"></div>
+                                <div class="flex w-full justify-between px-4">
+                                    <div class="w-5/12 p-2 bg-stone-200 rounded text-center text-xs text-stone-500">Sensitive Data (Kept Here)</div>
+                                    <div class="w-5/12 p-2 bg-stone-800 text-white rounded text-center text-xs">LLM Inference (Anonymized)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Reverse Role -->
+                <div id="content-reverse" class="hidden mt-8 bg-white rounded-lg shadow-lg p-6 md:p-10 border border-stone-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold text-stone-900 mb-4">The Empathy Loop</h3>
+                            <p class="text-stone-600 mb-4">
+                                To win a negotiation, you must understand the opponent. In Reverse Mode, <strong>you play the boss</strong>.
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <span class="text-rose-500 mr-2">&#10003;</span>
+                                    <span><strong>360 Degree Feedback:</strong> See how your arguments sound from the other side.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-rose-500 mr-2">&#10003;</span>
+                                    <span><strong>AI Mimicry:</strong> The AI plays "You", using your exact logic.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-rose-500 mr-2">&#10003;</span>
+                                    <span><strong>Psychological Insight:</strong> Learn *why* the manager says "No".</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="relative bg-rose-50 rounded-lg p-6 border border-rose-100 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">&#128257;</div>
+                                <h4 class="text-lg font-bold text-rose-700">Role Switch</h4>
+                                <p class="text-sm text-rose-600 mt-2">Current Role: <span class="font-bold underline">Antagonist</span></p>
+                                <p class="text-xs text-stone-500 mt-4 italic">"Now playing: The Skeptical Investor"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: The Persona Engine (Interactive) -->
+    <section id="personas" class="py-12 bg-white scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-stone-900">Meet Your Sparring Partners</h2>
+                <p class="text-stone-500 mt-2">Select a persona to see their behavioral profile. Aura adapts to these archetypes to test specific skills.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Persona List -->
+                <div class="space-y-4">
+                    <button onclick="selectPersona(0)" class="w-full text-left p-4 rounded-lg border border-stone-200 hover:border-sky-500 hover:shadow-md transition-all bg-white flex items-center group focus:outline-none focus:ring-2 focus:ring-sky-500" id="persona-btn-0">
+                        <div class="h-10 w-10 rounded-full bg-stone-200 flex items-center justify-center text-xl mr-4 group-hover:bg-sky-100 group-hover:text-sky-600">
+                            &#129488;
+                        </div>
+                        <div>
+                            <div class="font-bold text-stone-900">The Budget Hawk</div>
+                            <div class="text-xs text-stone-500">Scenario: Salary Negotiation</div>
+                        </div>
+                    </button>
+                    <button onclick="selectPersona(1)" class="w-full text-left p-4 rounded-lg border border-stone-200 hover:border-rose-500 hover:shadow-md transition-all bg-white flex items-center group focus:outline-none focus:ring-2 focus:ring-rose-500" id="persona-btn-1">
+                        <div class="h-10 w-10 rounded-full bg-stone-200 flex items-center justify-center text-xl mr-4 group-hover:bg-rose-100 group-hover:text-rose-600">
+                            &#128544;
+                        </div>
+                        <div>
+                            <div class="font-bold text-stone-900">The Aggressive Client</div>
+                            <div class="text-xs text-stone-500">Scenario: Escalation Management</div>
+                        </div>
+                    </button>
+                    <button onclick="selectPersona(2)" class="w-full text-left p-4 rounded-lg border border-stone-200 hover:border-green-500 hover:shadow-md transition-all bg-white flex items-center group focus:outline-none focus:ring-2 focus:ring-green-500" id="persona-btn-2">
+                        <div class="h-10 w-10 rounded-full bg-stone-200 flex items-center justify-center text-xl mr-4 group-hover:bg-green-100 group-hover:text-green-600">
+                            &#129300;
+                        </div>
+                        <div>
+                            <div class="font-bold text-stone-900">The Passive Director</div>
+                            <div class="text-xs text-stone-500">Scenario: Pitching an Idea</div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Persona Detail Card -->
+                <div class="lg:col-span-2">
+                    <div class="h-full bg-stone-50 rounded-xl border border-stone-200 p-6 md:p-8 flex flex-col justify-between" id="persona-detail-card">
+                        <!-- Content injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Roadmap & Impact -->
+    <section id="roadmap" class="py-12 bg-stone-900 text-white scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-sky-400 font-semibold tracking-wide uppercase">The Plan</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-white sm:text-4xl">
+                    90-Day Execution Roadmap
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-stone-400 lg:mx-auto">
+                    From MVP to viral growth in 3 months.
+                </p>
+            </div>
+
+            <div class="relative">
+                <!-- Vertical Line -->
+                <div class="timeline-line bg-stone-700"></div>
+
+                <div class="space-y-12">
+                    <!-- Phase 1 -->
+                    <div class="relative">
+                        <div class="timeline-dot bg-sky-500 border-stone-900"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-6 md:pt-0">
+                            <div class="md:text-right pr-8 order-2 md:order-1">
+                                <h3 class="text-xl font-bold text-white">Days 1–30: Core Engine</h3>
+                                <p class="text-stone-400 mt-2">Build MVP with "Aggressive Negotiator" & "Busy Director" personas. Finalize low-latency voice architecture.</p>
+                            </div>
+                            <div class="pl-8 order-1 md:order-2">
+                                <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-stone-800 text-stone-300 border border-stone-700">Development Phase</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 2 -->
+                    <div class="relative">
+                        <div class="timeline-dot bg-sky-500 border-stone-900"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-6 md:pt-0">
+                            <div class="md:text-right pr-8 order-2 md:order-1 hidden md:block">
+                                <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-sky-900 text-sky-300 border border-sky-700">Growth Hack</span>
+                            </div>
+                            <div class="pl-8 order-1 md:order-2">
+                                <h3 class="text-xl font-bold text-white">Days 31–60: The "Roast"</h3>
+                                <p class="text-stone-400 mt-2">Launch "Salary Negotiation Audit" viral tool. Goal: Onboard first 1,000 users via social sharing.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 3 -->
+                    <div class="relative">
+                        <div class="timeline-dot bg-sky-500 border-stone-900"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-6 md:pt-0">
+                            <div class="md:text-right pr-8 order-2 md:order-1">
+                                <h3 class="text-xl font-bold text-white">Days 61–90: B2B Pilot</h3>
+                                <p class="text-stone-400 mt-2">Rollout "Communication Fitness Score". Pilot with 2-3 boutique sales agencies for team training.</p>
+                            </div>
+                            <div class="pl-8 order-1 md:order-2">
+                                <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-rose-900 text-rose-300 border border-rose-700">Revenue</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Market Data -->
+            <div class="mt-20 border-t border-stone-800 pt-10">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div>
+                         <h3 class="text-lg font-medium text-white mb-4">Target Market: 400M+</h3>
+                         <p class="text-stone-400 text-sm mb-6">India's aspirational middle class is the primary target, sitting at the intersection of huge ambition and the exposure gap.</p>
+                         <div class="flex flex-wrap gap-2">
+                             <span class="bg-stone-800 px-3 py-1 rounded text-sm text-stone-300">MBA Students</span>
+                             <span class="bg-stone-800 px-3 py-1 rounded text-sm text-stone-300">New Managers</span>
+                             <span class="bg-stone-800 px-3 py-1 rounded text-sm text-stone-300">Sales Teams</span>
+                             <span class="bg-stone-800 px-3 py-1 rounded text-sm text-stone-300">Call Centers</span>
+                         </div>
+                     </div>
+                     <div>
+                        <h3 class="text-lg font-medium text-white mb-4">Projected Traction (L7 Retention)</h3>
+                         <!-- Chart Container for Retention -->
+                        <div class="chart-container" style="height: 200px;">
+                            <canvas id="growthChart"></canvas>
+                        </div>
+                     </div>
+                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-stone-200">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
+            <div class="flex justify-center space-x-6 md:order-2">
+                <span class="text-stone-400 hover:text-stone-500">
+                   Contact Founder
+                </span>
+            </div>
+            <div class="mt-8 md:mt-0 md:order-1">
+                <p class="text-center text-base text-stone-400">
+                    &copy; 2026 Aura. The Behavioral OS for Success.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- Data & State Management ---
+        const personas = [
+            {
+                name: "The Budget Hawk",
+                role: "Strict CFO",
+                scenario: "Salary Negotiation",
+                traits: ["Impatient", "Data-Driven", "Dismissive"],
+                quote: "I don't care about 'market rates'. I care about my P&L. Give me a number that makes sense.",
+                difficulty: "Hard",
+                color: "text-stone-800"
+            },
+            {
+                name: "The Aggressive Client",
+                role: "Dissatisfied Customer",
+                scenario: "Escalation Management",
+                traits: ["Loud", "Interrupts Often", "Emotional"],
+                quote: "This is unacceptable! I've been on hold for 20 minutes. I want a refund NOW!",
+                difficulty: "Expert",
+                color: "text-rose-600"
+            },
+            {
+                name: "The Passive Director",
+                role: "Disengaged Manager",
+                scenario: "Pitching an Idea",
+                traits: ["Distracted", "Non-committal", "Polite"],
+                quote: "That sounds... interesting. Send me an email and maybe we'll look at it next quarter.",
+                difficulty: "Medium",
+                color: "text-green-600"
+            }
+        ];
+
+        let currentPersonaIndex = 0;
+
+        // --- Charts Implementation ---
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Skills Gap Chart (Doughnut)
+            const ctx1 = document.getElementById('skillsGapChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Soft Skills (Success Driver)', 'Hard Skills'],
+                    datasets: [{
+                        data: [85, 15],
+                        backgroundColor: ['#0EA5E9', '#E5E7EB'], // Sky 500, Stone 200
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Inter', size: 12 },
+                                color: '#57534E'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + '%';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // 2. Growth/Retention Chart (Bar)
+            const ctx2 = document.getElementById('growthChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4', 'Wk 5', 'Wk 6'],
+                    datasets: [{
+                        label: 'Projected L7 Retention (%)',
+                        data: [15, 25, 40, 55, 60, 65],
+                        backgroundColor: '#38BDF8', // Sky 400
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: '#44403C' },
+                            ticks: { color: '#A8A29E' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#A8A29E' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1C1917',
+                            titleColor: '#fff',
+                            bodyColor: '#E0F2FE'
+                        }
+                    }
+                }
+            });
+
+            // Initialize Persona
+            renderPersona(0);
+        });
+
+        // --- Interaction Logic ---
+
+        // 1. Tab Switching
+        function switchTab(tabId) {
+            // Hide all content
+            document.getElementById('content-voice').classList.add('hidden');
+            document.getElementById('content-privacy').classList.add('hidden');
+            document.getElementById('content-reverse').classList.add('hidden');
+            
+            // Reset tab styles (desktop)
+            const tabs = ['voice', 'privacy', 'reverse'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if(btn) {
+                    btn.classList.remove('active-tab', 'text-sky-600');
+                    btn.classList.add('text-stone-500');
+                }
+            });
+
+            // Show selected content
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            
+            // Set active style (desktop)
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-stone-500');
+                activeBtn.classList.add('active-tab', 'text-sky-600');
+            }
+        }
+
+        // 2. Persona Selection
+        function selectPersona(index) {
+            currentPersonaIndex = index;
+            renderPersona(index);
+            
+            // Update button styles
+            for (let i = 0; i < personas.length; i++) {
+                const btn = document.getElementById(`persona-btn-${i}`);
+                if (i === index) {
+                    btn.classList.add('ring-2', 'ring-sky-500', 'bg-sky-50');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-sky-500', 'bg-sky-50');
+                }
+            }
+        }
+
+        function renderPersona(index) {
+            const p = personas[index];
+            const container = document.getElementById('persona-detail-card');
+            
+            // Create Trait Badges
+            const traitBadges = p.traits.map(t => 
+                `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white border border-stone-200 text-stone-800">${t}</span>`
+            ).join(' ');
+
+            container.innerHTML = `
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-2xl font-bold text-stone-900">${p.name}</h3>
+                            <p class="text-stone-500">${p.role}</p>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${p.difficulty === 'Expert' ? 'bg-rose-100 text-rose-800' : p.difficulty === 'Hard' ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}">
+                            ${p.difficulty}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-6 space-y-2">
+                        <div class="text-xs font-semibold uppercase text-stone-400 tracking-wider">Behavioral Traits</div>
+                        <div class="flex flex-wrap gap-2">${traitBadges}</div>
+                    </div>
+
+                    <div class="relative bg-white p-6 rounded-lg shadow-sm border border-stone-100 italic text-lg leading-relaxed ${p.color}">
+                        <span class="absolute top-2 left-2 text-4xl text-stone-200 font-serif">"</span>
+                        ${p.quote}
+                        <span class="absolute bottom-[-10px] right-4 text-4xl text-stone-200 font-serif">"</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 border-t border-stone-100 pt-6">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-stone-500">
+                            <span class="font-bold text-stone-900">Scenario:</span> ${p.scenario}
+                        </div>
+                        <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors">
+                            Simulate Interaction
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+    </script>
+</body>
+</html>
